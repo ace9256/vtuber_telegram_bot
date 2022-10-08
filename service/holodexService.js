@@ -1,4 +1,6 @@
 const axios = require("axios");
+const { Extra, Markup } = require("telegraf");
+const { recommandChoices } = require("../list/actions");
 const { holodexApiKey } = require("../env");
 const { channelList } = require("../list/channelList");
 const { token } = require("../env");
@@ -64,6 +66,67 @@ class HolodexService {
         disable_web_page_preview: true,
       });
     }
+  }
+
+  async recommand(ctx) {
+    const inlineMessageRatingKeyboard = Markup.inlineKeyboard(recommandChoices);
+    ctx.telegram.sendMessage(
+      ctx.update.message.chat.id,
+      "想搵啲咩?",
+      inlineMessageRatingKeyboard
+    );
+  }
+
+  async recommandPart2(include, ctx) {
+    ctx.editMessageReplyMarkup();
+    const params = include
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, function (str) {
+        return str.toUpperCase();
+      })
+      .split(" ");
+    await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+      chat_id: ctx.update.callback_query.message.chat.id,
+      text: `已選擇${
+        recommandChoices.filter((c) => c[0].callback_data === include)[0][0]
+          .text
+      }`,
+      reply_to_message_id: ctx.update.callback_query.message.message_id,
+      disable_web_page_preview: true,
+    });
+    const { data } = await axios.get(
+      `https://holodex.net/api/v2/live?topic=${params[0].toLowerCase()}${
+        params[1] === "Future"
+          ? "&max_upcoming_hours=1&status=upcoming"
+          : "&status=live"
+      }`,
+      {
+        headers: { "X-APIKEY": holodexApiKey },
+      }
+    );
+    const result = data
+      .map(
+        (d) => d.title + "\n" + `https://www.youtube.com/watch?v=${d.id}` + "\n"
+      )
+      .join("\n");
+    await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+      chat_id: ctx.update.callback_query.message.chat.id,
+      text: data.length === 0 ? "暫時找不到相關直播" : result,
+      reply_to_message_id: ctx.update.callback_query.message.message_id,
+      disable_web_page_preview: true,
+    });
+  }
+  async singingNow(ctx) {
+    this.recommandPart2(arguments["0"]["match"][0], ctx);
+  }
+  async asmrNow(ctx) {
+    this.recommandPart2(arguments["0"]["match"][0], ctx);
+  }
+  async singingFuture(ctx) {
+    this.recommandPart2(arguments["0"]["match"][0], ctx);
+  }
+  async asmrFuture(ctx) {
+    this.recommandPart2(arguments["0"]["match"][0], ctx);
   }
 }
 

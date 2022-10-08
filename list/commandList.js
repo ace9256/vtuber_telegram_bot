@@ -8,6 +8,8 @@ const commandList = [
   "check_spectating_lists utilService checkSpectatingLists",
   "check_stickers_list utilService checkStickersList",
   "crime utilService crime",
+  "pin utilService memo",
+  "unpin utilService delMemo",
   //chatService
   "55 chatService well",
   "54 chatService noNeed",
@@ -26,8 +28,7 @@ const commandList = [
   //holodexService
   "get_channels holodexService getChannels",
   "get_current_streams holodexService getCurrentStreams",
-  "pin utilService memo",
-  "unpin utilService delMemo",
+  "recommand holodexService recommand",
   //holocureService
   "holocure holocureService getHolocure",
 ];

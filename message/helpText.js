@@ -34,6 +34,7 @@ const helpText = `
 /check_spectating_lists 查看bot現在正在追蹤的名單
 /check_stickers_list 查看Stickers清單
 /holocure 查看Holocure更新日期及下載連結
+/recommand 尋找推薦直播
 `;
 const commandArr = helpText
   .split("\n")

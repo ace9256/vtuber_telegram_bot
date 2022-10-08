@@ -1,4 +1,5 @@
 const { commandList, commandWithParamsList } = require("./list/commandList");
+const { actions } = require("./list/actions")
 const { botWrapper } = require("./wrapper");
 const { port, token } = require("./env");
 const { commandArr } = require("./message/helpText");
@@ -23,9 +24,13 @@ const commandIterator = (bot) => {
       botWrapper(new Klass(), `${commandArr[2]}`)
     );
   }
-  // bot.on('sticker', ctx => {
-  //   console.log(ctx.update.message)
-  // })
+  actions.forEach(action => {
+    const Klass = require(`./service/${action[0].service}`);
+    bot.action(action[0].callback_data, botWrapper(new Klass(), `${action[0].callback_data}`))
+  })
+  bot.on('sticker', ctx => {
+    console.log(ctx.update.message)
+  })
   bot.on('animation', ctx => {
     console.log(ctx.update.message)
   })
