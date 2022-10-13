@@ -87,7 +87,7 @@ class HolodexService {
       .split(" ");
     await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
       chat_id: ctx.update.callback_query.message.chat.id,
-      text: `已選擇${
+      text: `已選擇 ${
         recommandChoices.filter((c) => c[0].callback_data === include)[0][0]
           .text
       }`,
@@ -106,7 +106,7 @@ class HolodexService {
     );
     const result = data
       .map(
-        (d) => d.title + "\n" + `https://www.youtube.com/watch?v=${d.id}` + "\n"
+        (d) => d.title + "\n" + d.channel?.name + "\n" + `https://www.youtube.com/watch?v=${d.id}` + "\n"
       )
       .join("\n");
     await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
