@@ -1,5 +1,7 @@
 const axios = require("axios");
-const { token } = require("../env");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+const { token, ocrApiKey } = require("../env");
 const { isMidNight } = require("../helper/checkMidNight");
 const { helpText } = require("../message/helpText");
 const { startText } = require("../message/startText");
@@ -9,6 +11,11 @@ const {
   downloadYoutubeStickersHelper,
 } = require("../helper/downloadYoutubeStickers");
 const { dateIsValid } = require("../helper/dateIsValid");
+const {
+  sendMessage,
+  getFile,
+  getFileUrl,
+} = require("../helper/telegramHelper");
 
 class UtilService {
   constructor() {}
@@ -33,7 +40,7 @@ class UtilService {
   async checkSC(ctx) {
     const youtubeID = this.getYoutubeID(ctx);
     if (youtubeID) {
-      const groups = ["youtube", "kojin", "2j3j", "vspo", "noripro"];
+      const groups = ["youtube", "kojin", "2j3j", "vspo", "noripro", "aogiri"];
       const types = ["archive", "realtime"];
       for (let group of groups) {
         for (let type of types) {
@@ -48,13 +55,8 @@ class UtilService {
           }
         }
       }
-      await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-        chat_id: ctx.update.message.chat.id,
-        text: "暫不支援此影片",
-        reply_to_message_id: ctx.update.message.reply_to_message
-          ? ctx.update.message.reply_to_message.message_id
-          : "",
-        disable_notification: isMidNight,
+      await await sendMessage(ctx, "暫不支援此影片", {
+        reply: ctx.update.message.reply_to_message,
       });
     }
   }
@@ -62,8 +64,8 @@ class UtilService {
   async checkChat(ctx) {
     const youtubeID = this.getYoutubeID(ctx);
     if (youtubeID) {
-      const groups = ["youtube"];
-      const types = ["realtime"];
+      const groups = ["youtube", "kojin", "2j3j", "vspo", "noripro", "aogiri"];
+      const types = ["archive", "realtime"];
       for (let group of groups) {
         for (let type of types) {
           const result = await this.getHololyzerData(
@@ -77,13 +79,8 @@ class UtilService {
           }
         }
       }
-      await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-        chat_id: ctx.update.message.chat.id,
-        text: "暫不支援此影片",
-        reply_to_message_id: ctx.update.message.reply_to_message
-          ? ctx.update.message.reply_to_message.message_id
-          : "",
-        disable_notification: isMidNight,
+      await await sendMessage(ctx, "暫不支援此影片", {
+        reply: ctx.update.message.reply_to_message,
       });
     }
   }
@@ -95,48 +92,43 @@ class UtilService {
         `https://www.youtube.com/watch?v=${youtubeID}`
       );
       let regex = /\[{"text":"\d.*?"},{"text":" watching now"}\]/;
-      await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-        chat_id: ctx.update.message.chat.id,
-        text: regex.exec(result.data)
+      await await sendMessage(
+        ctx,
+        regex.exec(result.data)
           ? `${eval(regex.exec(result.data)[0])[0].text} 人正在觀看`
           : "此影片並非直播/ 會限直播無法查閱觀看人數",
-        reply_to_message_id: ctx.update.message.reply_to_message
-          ? ctx.update.message.reply_to_message.message_id
-          : "",
-        disable_notification: isMidNight,
-      });
+        {
+          reply: ctx.update.message.reply_to_message,
+        }
+      );
     }
   }
 
   getYoutubeID(ctx) {
-    if (!ctx.update.message.reply_to_message) {
+    const replyToMessage = ctx.update.message.reply_to_message;
+    if (!replyToMessage) {
       ctx.reply("你冇quote youtube link呀");
       return null;
     } else if (
-      !ctx.update.message.reply_to_message.text.includes(
-        "https://www.youtube.com/watch?v="
-      ) &&
-      !ctx.update.message.reply_to_message.text.includes("https://youtu.be/")
+      !replyToMessage.text.includes("https://www.youtube.com/watch?v=") &&
+      !replyToMessage.text.includes("https://www.youtube.com/live/") &&
+      !replyToMessage.text.includes("https://youtu.be/")
     ) {
       ctx.reply("你唔係quote緊 youtube link呀");
       return null;
     }
-    if (
-      ctx.update.message.reply_to_message.text.includes(
-        "https://www.youtube.com/watch?v="
-      )
-    ) {
-      var youtubeID = ctx.update.message.reply_to_message.text.split(
+    if (replyToMessage.text.includes("https://www.youtube.com/watch?v=")) {
+      var youtubeID = replyToMessage.text.split(
         "https://www.youtube.com/watch?v="
       )[1];
+    } else if (replyToMessage.text.includes("https://www.youtube.com/live/")) {
+      var youtubeID = replyToMessage.text
+        .split("https://www.youtube.com/live/")[1]
+        .split("?")[0];
     } else {
-      var youtubeID =
-        ctx.update.message.reply_to_message.text.split("https://youtu.be/")[1];
+      var youtubeID = replyToMessage.text.split("https://youtu.be/")[1];
     }
-    if (youtubeID.includes("&")) {
-      youtubeID = youtubeID.split("&")[0];
-    }
-    return youtubeID;
+    return youtubeID.split("&")[0];
   }
 
   async getHololyzerData(youtubeID, group, status, type) {
@@ -146,52 +138,78 @@ class UtilService {
         validateStatus: (status) => status < 500,
       }
     );
-    if (result.status == 404) {
-      return false;
-    }
-    return result;
+    return result.status === 404 ? false : result;
   }
 
   async resHololyzerSCData(ctx, result) {
-    await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-      chat_id: ctx.update.message.chat.id,
-      text: result.data.split("---- ---- ----       ----")[1]
-        ? "SC: " +
-          result.data
-            .split("---- ---- ----       ----")[1]
-            .split("</pre>")[0]
-            .trim() +
-          "\n截至: " +
-          new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })
-        : "SC: 0円" +
-          "\n截至: " +
-          new Date().toLocaleString("zh-TW", { timeZone: "Asia/Taipei" }),
-      reply_to_message_id: ctx.update.message.reply_to_message
-        ? ctx.update.message.reply_to_message.message_id
-        : "",
-      disable_notification: isMidNight,
-    });
+    try {
+      const { document } = new JSDOM(
+        `<table>\n<tr>\n${
+          result.data.match(
+            /(<td class='supacha_td'>.*?<\/td>)\n<\/tr>\n<\/table>/
+          )[1]
+        }`
+      ).window;
+
+      const supachaTds = document.querySelectorAll(".supacha_td");
+      const totalAmountTd = supachaTds[supachaTds.length - 1];
+      const totalAmount = parseInt(
+        totalAmountTd.innerHTML.replace(/\\|,/g, "")
+      );
+      await sendMessage(
+        ctx,
+        `SC: ${
+          totalAmount !== NaN ? totalAmount.toLocaleString("en-US") : 0
+        }円\n截至: ${new Date().toLocaleString("zh-TW", {
+          timeZone: "Asia/Taipei",
+        })}`,
+        {
+          reply: ctx.update.message.reply_to_message,
+        }
+      );
+    } catch {
+      return await sendMessage(
+        ctx,
+        `SC: ${0}円\n截至: ${new Date().toLocaleString("zh-TW", {
+          timeZone: "Asia/Taipei",
+        })}`,
+        {
+          reply: ctx.update.message.reply_to_message,
+        }
+      );
+    }
   }
 
   async resHololyzerChatData(ctx, result) {
-    let chatArr = result.data.split("<td width=200>");
-    chatArr.shift();
-    chatArr = chatArr.map((el) => {
-      let elArr = el.split("</td>");
-      elArr.pop();
-      return `${elArr[0]}: ${elArr[1].split("<td>")[1]}`;
-    });
-    await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-      chat_id: ctx.update.message.chat.id,
-      text: chatArr.length ? chatArr.join("\n\n") : "暫無ホロメン留言",
-      reply_to_message_id: ctx.update.message.reply_to_message
-        ? ctx.update.message.reply_to_message.message_id
-        : "",
-      disable_notification: isMidNight,
-    });
+    let chatArr = [...result.data.matchAll(/<td(?: width=200>|>)(.*?)<\/td>/g)]
+      .map((match) => match[1])
+      .slice(2)
+      .reduce((prev, curr, ind) => {
+        if (ind % 2 === 0) {
+          prev.unshift(`${curr}: `);
+        } else {
+          prev[0] += curr;
+        }
+        return prev;
+      }, [])
+      .reverse();
+    await sendMessage(
+      ctx,
+      chatArr.length
+        ? chatArr
+            .join("\n\n")
+            .replaceAll(/<img\s(.*emoji_u)(.*)(.svg) \/>/g, (_, __, capture) =>
+              String.fromCodePoint(parseInt(`0x${capture}`, 16))
+            )
+            .replaceAll(/(<img.*?\/>)/g, "[貼圖]")
+        : "暫無ホロメン留言",
+      {
+        reply: ctx.update.message.reply_to_message,
+      }
+    );
   }
 
-  async setAlarm(ctx) {
+  async setAlarm(ctx, addedDays = 0) {
     const message_id = ctx.update.message.message_id;
     const chat_id = ctx.update.message.chat.id;
     const from = ctx.update.message.from.id;
@@ -240,7 +258,9 @@ class UtilService {
     }
     console.log(params);
     let input = {
-      date: new Date(new Date().setHours(new Date().getHours() + 8)).getDate(),
+      date: new Date(
+        new Date().setHours(new Date().getHours() + 8 + 24 * addedDays)
+      ).getDate(),
       month: new Date(
         new Date().setHours(new Date().getHours() + 8)
       ).getMonth(),
@@ -262,7 +282,7 @@ class UtilService {
         `https://api.telegram.org/bot${token}/sendMessage`,
         {
           chat_id: ctx.update.message.chat.id,
-          text: "較鬧鐘唔set時間, 你on9?",
+          text: "想幾時?",
           reply_to_message_id: ctx.update.message.message_id,
         }
       );
@@ -277,14 +297,7 @@ class UtilService {
         input.min
       ) <= new Date()
     ) {
-      return await axios.post(
-        `https://api.telegram.org/bot${token}/sendMessage`,
-        {
-          chat_id: ctx.update.message.chat.id,
-          text: "瞓醒未, 過哂鐘啦",
-          reply_to_message_id: ctx.update.message.message_id,
-        }
-      );
+      return this.setAlarm(ctx, 1);
     }
     const {
       data: { db },
@@ -720,7 +733,80 @@ class UtilService {
   }
 
   async crime(ctx) {
-    ctx.reply(`黎緊暫時未有飯聚, 歡迎動議`);
+    ctx.reply(`你叫左屋企唔好煮你飯先啦`);
+  }
+
+  async random(ctx) {
+    const args = ctx.match.input.split(" ");
+    if (args.length === 1) {
+      return sendMessage(ctx, `想抽d咩?`, {
+        reply: ctx.update.message.reply_to_message,
+      });
+    }
+    args.shift();
+    return sendMessage(ctx, args[Math.floor(Math.random() * args.length)], {
+      reply: ctx.update.message.reply_to_message,
+    });
+  }
+
+  async ocr(ctx) {
+    // check server status
+    const { data: statusRes } = await axios.get("https://status.ocr.space/");
+    const { document } = new JSDOM(statusRes).window;
+    const status = document.querySelector(".status").innerHTML;
+    if (status === " DOWN ") {
+      await sendMessage(
+        ctx,
+        "個圖像識別server好似down down地, 如果唔得就過一陣再試啦",
+        {
+          reply: ctx.update.message.reply_to_message,
+        }
+      );
+    }
+
+    // main logic
+    const args = ctx.match.input.split(" ");
+    if (args.length === 1) {
+      return sendMessage(
+        ctx,
+        `想認咩語言, 麻煩加番係後面\nChinese(Traditional) = cht\nEnglish = eng\nKorean = kor\nJapanese = jpn`,
+        {
+          reply: ctx.update.message.reply_to_message,
+        }
+      );
+    }
+
+    if (!ctx.update.message.reply_to_message) {
+      return sendMessage(ctx, `你想認d咩, 要quote, 圖又得, Link又得`, {
+        reply: ctx.update.message.reply_to_message,
+      });
+    }
+
+    const photo = ctx.update.message.reply_to_message.photo;
+    if (photo) {
+      const filePath = (await getFile(photo?.pop().file_id)).result.file_path;
+      var url = getFileUrl(filePath);
+    }
+
+    const text = ctx.update.message.reply_to_message.text;
+    if (text) {
+      var url = text;
+    }
+
+    const ext = args[2] || url.match(/(PDF|GIF|PNG|JPG|TIF|BMP)/i)?.[0];
+    const { data } = await axios.get(
+      `https://api.ocr.space/parse/imageurl?apikey=${ocrApiKey}&url=${encodeURIComponent(
+        url
+      )}&filetype=${ext}&language=${args[1]}&OCREngine=3&scale=true`
+    );
+    if (!data.ParsedResults?.[0].ParsedText) {
+      return await sendMessage(ctx, "投降, 認唔到", {
+        reply: ctx.update.message.reply_to_message,
+      });
+    }
+    await sendMessage(ctx, data.ParsedResults?.[0].ParsedText, {
+      reply: ctx.update.message.reply_to_message,
+    });
   }
 }
 

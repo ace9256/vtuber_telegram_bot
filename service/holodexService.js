@@ -5,25 +5,22 @@ const { holodexApiKey } = require("../env");
 const { channelList } = require("../list/channelList");
 const { token } = require("../env");
 const { format2 } = require("../helper/dateFormatter");
+const { fetchHolodex } = require("../helper/holodexHelper");
 
 class HolodexService {
   constructor() {}
 
+  // For Dev only
   async getChannels(ctx) {
-    const response = await axios.get(
-      "https://holodex.net/api/v2/channels?org=Hololive&limit=100",
-      {
-        headers: { "X-APIKEY": holodexApiKey },
-      }
+    const data = await fetchHolodex(
+      "https://holodex.net/api/v2/channels?org=Hololive&limit=100"
     );
-    const channels = response.data
+    const channels = data
       .map((el) => ({ id: el.id, name: el.name, org: el.org, group: el.group }))
       .filter(
         (el) =>
-          el.group !== null &&
-          !el.group.includes("Holostars") &&
-          !el.group.includes("INACTIVE") &&
-          !el.name.includes("holostars") &&
+          !["Holostars", "INACTIVE"].includes(el.group) &&
+          !["holostars"].includes(el.name) &&
           el.group === "GAMERS"
       );
     console.log(channels.length);
@@ -32,10 +29,9 @@ class HolodexService {
 
   async getStreams() {
     const channelIds = channelList.map((el) => el.id).join(",");
-    const { data } = await axios.get(
+    return await fetchHolodex(
       `https://holodex.net/api/v2/users/live?channels=${channelIds}`
     );
-    return data;
   }
 
   async getCurrentStreams(ctx) {
@@ -106,7 +102,13 @@ class HolodexService {
     );
     const result = data
       .map(
-        (d) => d.title + "\n" + d.channel?.name + "\n" + `https://www.youtube.com/watch?v=${d.id}` + "\n"
+        (d) =>
+          d.title +
+          "\n" +
+          d.channel?.name +
+          "\n" +
+          `https://www.youtube.com/watch?v=${d.id}` +
+          "\n"
       )
       .join("\n");
     await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {

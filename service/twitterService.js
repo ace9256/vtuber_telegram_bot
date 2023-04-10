@@ -38,7 +38,7 @@ class TwitterService {
           {
             chat_id: chatId,
             text:
-              url +
+              url.replace("https://twitter.com/", "https://vxtwitter.com/") +
               `\n${username}\n\n${text}\n\n投稿時間: ${format(created_at)}`,
             disable_web_page_preview: false,
             disable_notification: isMidNight,
