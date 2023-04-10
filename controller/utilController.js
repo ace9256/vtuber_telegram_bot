@@ -14,8 +14,6 @@ class UtilController {
         responseType: "arraybuffer",
       });
       const buffer = Buffer.from(data, "binary").toString("base64");
-      console.log(typeof buffer);
-      console.log(buffer);
       res.json({ buffer });
     } catch (e) {
       console.log(e);

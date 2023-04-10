@@ -1,5 +1,6 @@
 const token = process.env["TG_TOKEN"];
 const port = process.env["PORT"];
 const holodexApiKey = process.env["HOLODEX_API_KEY"];
+const ocrApiKey = process.env["OCR_API_KEY"];
 
-module.exports = { token, port, holodexApiKey };
+module.exports = { token, port, holodexApiKey, ocrApiKey };

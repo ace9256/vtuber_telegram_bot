@@ -1,5 +1,13 @@
 const UtilService = require("./service/utilService");
 
+const setupAlarm = () => {
+  setTimeout(() => {
+    setInterval(async () => {
+      await alarmHandler();
+    }, 60000);
+  }, getRoundedDate(1, new Date()) - new Date());
+};
+
 const alarmHandler = async () => {
   try {
     await new UtilService().executeAlarm();
@@ -15,4 +23,4 @@ let getRoundedDate = (minutes, d = new Date()) => {
   return roundedDate;
 };
 
-module.exports = { alarmHandler, getRoundedDate };
+module.exports = { setupAlarm };
