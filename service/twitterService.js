@@ -1,15 +1,18 @@
 const axios = require("axios");
 const { format, format2 } = require("../helper/dateFormatter");
 const { token } = require("../env");
+const { identities } = require("../env");
 const { chatList } = require("../list/chatList");
 const { isMidNight } = require("../helper/checkMidNight");
 const { recovereLinks } = require("../helper/recovereLinks");
 const { channelList } = require("../list/channelList");
 const HolodexService = require("./holodexService");
+const TwitterWorker = require("../workers/twitterWorker");
 
 class TwitterService {
   constructor() {
     this.holodexService = new HolodexService();
+    this.twitterWorker = new TwitterWorker(identities);
   }
 
   async newTweetHandler(
@@ -182,6 +185,10 @@ class TwitterService {
         }
       }
     }
+  }
+  
+  async checkTwitter(ctx) {
+    await this.twitterWorker.getNewTweets(ctx)
   }
 }
 

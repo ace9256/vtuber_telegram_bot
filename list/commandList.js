@@ -34,6 +34,8 @@ const commandList = [
   "holocure holocureService getHolocure",
   //shopifyService
   "quantity shopifyService getQuantity",
+  //twitterService
+  "check_twitter twitterService checkTwitter",
 ];
 
 const commandWithParamsList = [
@@ -46,8 +48,6 @@ const commandWithParamsList = [
   "\/cal.* utilService calculate",
   "\/unpin.* utilService delMemo",
   "\/t.* utilService translate",
-  "\/54.* chatService noNeed",
-  "\/55.* chatService well",
   "@here chatService tagAll",
   "\/ocr.* utilService ocr",
 ];

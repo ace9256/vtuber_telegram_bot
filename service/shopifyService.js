@@ -7,6 +7,9 @@ class ShopifyService {
   constructor() {}
 
   async getQuantity(ctx) {
+    return await sendMessage(ctx, "shopify改左野唔俾睇了", {
+      reply: ctx.update.message.reply_to_message,
+    });
     const url = ctx.update.message.reply_to_message.text;
     const response = await axios.get(url);
     let html = response.data;

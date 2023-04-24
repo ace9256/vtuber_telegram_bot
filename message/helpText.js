@@ -16,8 +16,6 @@ const helpText = `
 
 打招呼
 /greeting 用拉普語打招呼
-/55 同棍dee打招呼
-/54 棍\: 不了
 /ngng 同老公打招呼
 /osakana おさかな！！！
 /katsumoku かつもく～かつもく～
@@ -38,6 +36,7 @@ const helpText = `
 /get_current_streams 查看Live資料
 /check_spectating_lists 查看bot現在正在追蹤的名單
 /check_stickers_list 查看Stickers清單
+/check_twitter 查看有沒有新Tweet
 /holocure 查看Holocure更新日期及下載連結
 /recommand 尋找推薦直播
 `;

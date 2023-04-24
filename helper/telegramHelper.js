@@ -3,11 +3,11 @@ const { token } = require("../env");
 
 const sendSticker = async (ctx, stickerId, options = {}) => {
   await axios.post(`https://api.telegram.org/bot${token}/sendSticker`, {
-    chat_id: ctx.update.message.chat.id,
+    chat_id: ctx?.update.message.chat.id || options.chat_id,
     sticker: stickerId,
     ...(options.reply
       ? {
-          reply_to_message_id: ctx.update.message.reply_to_message
+          reply_to_message_id: ctx?.update.message.reply_to_message
             ? ctx.update.message.reply_to_message.message_id
             : "",
         }
@@ -17,11 +17,11 @@ const sendSticker = async (ctx, stickerId, options = {}) => {
 
 const sendMessage = async (ctx, text, options = {}) => {
   await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-    chat_id: ctx.update.message.chat.id,
+    chat_id: ctx?.update.message.chat.id || options.chat_id,
     text: text,
     ...(options.reply
       ? {
-          reply_to_message_id: ctx.update.message.reply_to_message
+          reply_to_message_id: ctx?.update.message.reply_to_message
             ? ctx.update.message.reply_to_message.message_id
             : "",
         }
