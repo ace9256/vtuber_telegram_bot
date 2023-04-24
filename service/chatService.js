@@ -24,34 +24,6 @@ class ChatService {
     }
   }
 
-  async well(ctx) {
-    const args = ctx.match.input.split(" ");
-    if (args[1]) {
-      await sendMessage(ctx, `${args[1]}: 屌又係棍dee式鳩屎留言`, {
-        reply: ctx.update.message.reply_to_message,
-      });
-    }
-    await sendSticker(
-      ctx,
-      "CgACAgUAAxkBAAIN5WOQkwUOgH4Und1aYqcREZl03KTDAAJhCQACZVgQVGNN2RpfoGdDKwQ",
-      {
-        reply: ctx.update.message.reply_to_message,
-      }
-    );
-  }
-
-  async noNeed(ctx) {
-    const args = ctx.match.input.split(" ");
-    if (args[1]) {
-      return await sendMessage(ctx, `${args[1]}: 牙棍不了`, {
-        reply: ctx.update.message.reply_to_message,
-      });
-    }
-    await sendMessage(ctx, "棍: 不了", {
-      reply: ctx.update.message.reply_to_message,
-    });
-  }
-
   async fiftyFifty(ctx) {
     const replyToMessage = ctx.update.message.reply_to_message;
     const isQuote = replyToMessage && replyToMessage.text;

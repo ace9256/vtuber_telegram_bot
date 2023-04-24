@@ -65,6 +65,7 @@ const stickersList = [
   "紫宮るな: https://t.me/addstickers/shinomiyaStickers",
   "久々湊るい: https://t.me/addstickers/kugumirui",
   "七瀬える: https://t.me/addstickers/NanaseEru",
+  "天廻てん: https://t.me/addstickers/AmaeTen",
   "FuwaFuwa35: https://t.me/addstickers/fuwafuwa35",
   "みたらしねこ: https://t.me/addstickers/mitachishineko",
   "久遠たま: https://t.me/addstickers/QuonTama",

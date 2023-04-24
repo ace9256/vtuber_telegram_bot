@@ -7,7 +7,6 @@ const { chatList } = require("../list/chatList");
 class TwitterController {
   constructor() {
     this.twitterService = new TwitterService();
-    this.a = 123;
   }
 
   async newTweetHandler(req, res) {
