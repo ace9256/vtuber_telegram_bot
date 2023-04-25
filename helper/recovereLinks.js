@@ -10,7 +10,10 @@ const recovereLinks = async (text) => {
     );
     if (
       recoveredLink[recoveredLink.length - 1].url &&
-      recoveredLink[recoveredLink.length - 1].url.includes("www.youtube.com")
+      (recoveredLink[recoveredLink.length - 1].url.includes(
+        "www.youtube.com"
+      ) ||
+        recoveredLink[recoveredLink.length - 1].url.includes("www.twitch.tv"))
     ) {
       recoveredLinks.push(recoveredLink[recoveredLink.length - 1].url);
     }

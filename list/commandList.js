@@ -34,8 +34,6 @@ const commandList = [
   "holocure holocureService getHolocure",
   //shopifyService
   "quantity shopifyService getQuantity",
-  //twitterService
-  "check_twitter twitterService checkTwitter",
 ];
 
 const commandWithParamsList = [
@@ -50,6 +48,7 @@ const commandWithParamsList = [
   "\/t.* utilService translate",
   "@here chatService tagAll",
   "\/ocr.* utilService ocr",
+  "\/check_twitter.* twitterService checkTwitter",
 ];
 
 module.exports = { commandList, commandWithParamsList };
