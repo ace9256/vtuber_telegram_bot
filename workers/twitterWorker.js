@@ -157,15 +157,38 @@ class TwitterWorker {
     if (extractedTweets.filter((t) => t.retweetUrl).length === 0) {
       return;
     }
+    const retweetMap = extractedTweets
+      .filter((t) => t.retweetUrl)
+      .reduce((prev, curr) => {
+        if (prev[curr.ownerScreenName]) {
+          prev[curr.ownerScreenName].urlObj.push({
+            url: curr.retweetUrl,
+            owner: curr.retweetOwner,
+          });
+          return prev;
+        }
+        return {
+          ...prev,
+          [curr.ownerScreenName]: {
+            urlObj: [{ url: curr.retweetUrl, owner: curr.retweetOwner }],
+            name: curr.ownerName,
+          },
+        };
+      }, {});
     await sendMessage(
       ctx,
-      extractedTweets
-        .filter((t) => t.retweetUrl)
-        .map((t) => `${t.ownerName} Retweeted\n${t.retweetUrl}`)
-        .join("\n"),
+      Object.keys(retweetMap).reduce(
+        (prev, curr) =>
+          prev +
+          `${retweetMap[curr].name} Retweeted\n${retweetMap[curr].urlObj
+            .map((obj) => `<a href='${obj.url}'>${obj.owner} 的 tweet</a>`)
+            .join("\n")}\n\n`,
+        ""
+      ),
       {
         chat_id,
         disable_web_page_preview: true,
+        parse_mode: "HTML",
       }
     );
   }
@@ -215,6 +238,7 @@ class TwitterWorker {
     return {
       entryId,
       url: `https://vxtwitter.com/${ownerScreenName}/status/${entryId}`,
+      ownerScreenName,
       ownerName,
       fullText,
       createdAt,
@@ -263,6 +287,7 @@ class TwitterWorker {
       tweetData.core.user_results.result.legacy.screen_name;
     return {
       retweetUrl: `https://vxtwitter.com/${retweetOwnerScreenName}/status/${retweetId}`,
+      retweetOwner: retweetOwnerScreenName,
     };
   }
 }
