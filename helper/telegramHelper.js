@@ -31,6 +31,11 @@ const sendMessage = async (ctx, text, options = {}) => {
           parse_mode: options.parse_mode,
         }
       : {}),
+    ...(options.disable_web_page_preview
+      ? {
+          disable_web_page_preview: options.disable_web_page_preview,
+        }
+      : {}),
   });
 };
 

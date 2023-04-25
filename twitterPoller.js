@@ -7,7 +7,7 @@ const setupTwitterPoller = () => {
     twitterPoller();
     setInterval(async () => {
       await twitterPoller();
-    }, 627429);
+    }, 209143);
   }, getRoundedDate(1, new Date()) - new Date());
 };
 

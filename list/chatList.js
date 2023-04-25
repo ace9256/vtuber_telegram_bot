@@ -29,11 +29,12 @@ const memberList = {
     "yokoa",
     "alex0608",
     "ykhnlm",
-    "iiorange",
     "d74ru9",
     "konwagahaikapuharobo",
     "chinggggggg",
     "ky_0725",
+    "kn0201",
+    "kekwt",
   ],
 };
 
