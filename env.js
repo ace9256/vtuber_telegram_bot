@@ -3,6 +3,7 @@ const port = process.env["PORT"];
 const holodexApiKey = process.env["HOLODEX_API_KEY"];
 const ocrApiKey = process.env["OCR_API_KEY"];
 const twitterList = process.env["TWITTER_LIST"];
+const replitDbDomain = process.env["REPLIT_DB_DOMAIN"];
 
 class Identity {
   constructor(id, twitterAuthorization, twitterCookie, twitterXCsrfToken) {
@@ -31,6 +32,7 @@ module.exports = {
   port,
   holodexApiKey,
   ocrApiKey,
+  replitDbDomain,
   identities,
   twitterList,
 };

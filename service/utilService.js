@@ -1,7 +1,7 @@
 const axios = require("axios");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-const { token, ocrApiKey } = require("../env");
+const { token, ocrApiKey, replitDbDomain } = require("../env");
 const { isMidNight } = require("../helper/checkMidNight");
 const { helpText } = require("../message/helpText");
 const { startText } = require("../message/startText");
@@ -223,7 +223,7 @@ class UtilService {
       const {
         data: { data },
       } = await axios.get(
-        `https://CtoTelegramBot.szetopak.repl.co/db/timeReminder?chatId=${chat_id}&from=${from}`
+        `${replitDbDomain}/db/timeReminder?chatId=${chat_id}&from=${from}`
       );
       if (!data) {
         return await axios.post(
@@ -302,7 +302,7 @@ class UtilService {
     const {
       data: { db },
     } = await axios.post(
-      "https://CtoTelegramBot.szetopak.repl.co/db/timeReminder",
+      "${replitDbDomain}/db/timeReminder",
       body
     );
     if (db) {
@@ -371,7 +371,7 @@ class UtilService {
       const {
         data: { db },
       } = await axios.delete(
-        `https://CtoTelegramBot.szetopak.repl.co/db/timeReminder`,
+        `${replitDbDomain}/db/timeReminder`,
         {
           data: {
             chat_id,
@@ -412,7 +412,7 @@ class UtilService {
     const {
       data: { db },
     } = await axios.delete(
-      `https://CtoTelegramBot.szetopak.repl.co/db/timeReminder`,
+      `${replitDbDomain}/db/timeReminder`,
       {
         data: {
           chat_id,
@@ -446,7 +446,7 @@ class UtilService {
     const {
       data: { data },
     } = await axios.get(
-      `https://CtoTelegramBot.szetopak.repl.co/db/timeReminder?chatId=all&from=`
+      `${replitDbDomain}/db/timeReminder?chatId=all&from=`
     );
     for (let chat of data) {
       for (let chat_id in chat) {
@@ -476,7 +476,7 @@ class UtilService {
                 }
               );
               await axios.delete(
-                `https://CtoTelegramBot.szetopak.repl.co/db/timeReminder`,
+                `${replitDbDomain}/db/timeReminder`,
                 {
                   data: {
                     chat_id,
@@ -604,7 +604,7 @@ class UtilService {
       const {
         data: { db },
       } = await axios.post(
-        "https://CtoTelegramBot.szetopak.repl.co/db/memo",
+        "${replitDbDomain}/db/memo",
         body
       );
       if (db) {
@@ -630,7 +630,7 @@ class UtilService {
       const {
         data: { data },
       } = await axios.get(
-        `https://CtoTelegramBot.szetopak.repl.co/db/memo?chatId=${chat_id}`
+        `${replitDbDomain}/db/memo?chatId=${chat_id}`
       );
       if (data) {
         let ans = "";
@@ -666,7 +666,7 @@ class UtilService {
       const {
         data: { db },
       } = await axios.delete(
-        `https://CtoTelegramBot.szetopak.repl.co/db/memo`,
+        `${replitDbDomain}/db/memo`,
         {
           data: {
             chat_id,
@@ -705,7 +705,7 @@ class UtilService {
     }
     const {
       data: { db },
-    } = await axios.delete(`https://CtoTelegramBot.szetopak.repl.co/db/memo`, {
+    } = await axios.delete(`${replitDbDomain}/db/memo`, {
       data: {
         chat_id,
         target: params[1],
