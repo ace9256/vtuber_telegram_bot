@@ -2,7 +2,7 @@ const followRedirect = require("follow-redirect-url");
 
 const SitesDomain = ["www.youtube.com", "www.twitch.tv", "twitcasting.tv"];
 
-const recovereLinks = async (text) => {
+const recoverLinks = async (text) => {
   const links = text.split("https://");
   links.shift();
   links.pop();
@@ -22,4 +22,4 @@ const recovereLinks = async (text) => {
   return recoveredLinks;
 };
 
-module.exports = { recovereLinks };
+module.exports = { recoverLinks };

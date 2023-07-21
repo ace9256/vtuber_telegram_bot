@@ -4,7 +4,7 @@ const { token } = require("../env");
 const { identities } = require("../env");
 const { chatList } = require("../list/chatList");
 const { isMidNight } = require("../helper/checkMidNight");
-const { recovereLinks } = require("../helper/recovereLinks");
+const { recoverLinks } = require("../helper/recoverLinks");
 const { channelList } = require("../list/channelList");
 const HolodexService = require("./holodexService");
 const TwitterWorker = require("../workers/twitterWorker");
@@ -24,7 +24,7 @@ class TwitterService {
 //     media
 //   ) {
 //     const url = `https://twitter.com/${userScreenName}/status/${tweetId}`;
-//     const recoveredLinks = await recovereLinks(text);
+//     const recoveredLinks = await recoverLinks(text);
 //     for (let chatId of chatList) {
 //       if (userScreenName === "holo_space_bot") {
 //         await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {

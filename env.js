@@ -1,4 +1,5 @@
 const token = process.env["TG_TOKEN"];
+const TweetsMessageThreadId = process.env["TWEETS_MESSAGE_THREAD_ID"];
 const port = process.env["PORT"];
 const holodexApiKey = process.env["HOLODEX_API_KEY"];
 const ocrApiKey = process.env["OCR_API_KEY"];
@@ -7,7 +8,7 @@ const replitDbDomain = process.env["REPLIT_DB_DOMAIN"];
 
 class Identity {
   constructor(id, twitterAuthorization, twitterCookie, twitterXCsrfToken) {
-    this.id = id
+    this.id = id;
     this.twitterAuthorization = twitterAuthorization;
     this.twitterCookie = twitterCookie;
     this.twitterXCsrfToken = twitterXCsrfToken;
@@ -29,6 +30,7 @@ const identities = Array.from({ length: 5 }, (_, i) => i + 1).reduce(
 
 module.exports = {
   token,
+  TweetsMessageThreadId,
   port,
   holodexApiKey,
   ocrApiKey,

@@ -1,7 +1,12 @@
 const axios = require("axios");
-const { token, twitterList, replitDbDomain } = require("../env");
+const {
+  token,
+  TweetsMessageThreadId,
+  twitterList,
+  replitDbDomain,
+} = require("../env");
 const { isMidNight } = require("../helper/checkMidNight");
-const { recovereLinks } = require("../helper/recovereLinks");
+const { recoverLinks } = require("../helper/recoverLinks");
 const { sendMessage } = require("../helper/telegramHelper");
 const { format } = require("../helper/dateFormatter");
 const { sleep } = require("../helper/sleep");
@@ -30,119 +35,140 @@ class TwitterWorker {
         }
       );
       tweets = responseTweets;
-      if (tweets.errors) {
-        throw new Error(JSON.parse(tweets.error));
+      // if (tweets.errors) {
+      //   console.log(JSON.stringify(tweets.errors));
+      //   throw new Error(JSON.stringify(tweets.errors));
+      // }
+
+      const chat_id = ctx?.update.message.chat.id;
+      const finalChatId = chat_id || fallBackChatId;
+      const lastRetrievedTweets = await this.getLastRetrievedTweets(
+        finalChatId
+      );
+
+      let extractedTweets = this.extractTweets(tweets);
+      if (extractedTweets === undefined) {
+        if (ctx) {
+          return await sendMessage(ctx, "Twitter又改野整壞左", {
+            reply_to_message_id: TweetsMessageThreadId,
+          });
+        }
+        return;
       }
+
+      extractedTweets = extractedTweets
+        .filter(
+          (tweet) =>
+            tweet.entryId.startsWith("tweet-") ||
+            tweet.entryId.startsWith("list-conversation-")
+        )
+        .map((tweet) => this.processTweet(tweet))
+        .flat();
+
+      const lastestTweets = extractedTweets.map((t) => t.entryId);
+
+      if (lastRetrievedTweets.includes(extractedTweets[0].entryId)) {
+        return ctx
+          ? await sendMessage(ctx, "暫時沒有新tweet", {
+              reply_to_message_id: TweetsMessageThreadId,
+            })
+          : null;
+      }
+
+      let sliceIndex = -1;
+      let allLooped = false;
+      let loopIdx = 0;
+      while (sliceIndex <= 0 && !allLooped) {
+        sliceIndex = extractedTweets.findIndex(
+          (tweet) => tweet.entryId === lastRetrievedTweets[loopIdx]
+        );
+        allLooped = lastRetrievedTweets.length <= ++loopIdx;
+      }
+      if (sliceIndex > 0) {
+        extractedTweets = extractedTweets
+          .slice(0, sliceIndex)
+          .filter(
+            (extractedTweet) =>
+              extractedTweet.entryId >= lastRetrievedTweets[loopIdx - 1]
+          );
+      } else {
+        return await sendMessage(
+          null,
+          `lastRetrievedTweet\n------\n${extractedTweets
+            .map((t) => t.entryId)
+            .join("\n")}`,
+          {
+            chat_id: "279337376",
+            reply_to_message_id: TweetsMessageThreadId,
+          }
+        );
+      }
+
+      extractedTweets.reverse();
+      const completedTweets = [];
+
+      try {
+        for (let t of extractedTweets) {
+          if (t.spaceUrl) {
+            await sendMessage(
+              ctx,
+              `🎙️ Twitter Space 通知\n\n${t.ownerName}\n${t.spaceUrl}`,
+              {
+                chat_id: finalChatId,
+                reply_to_message_id: TweetsMessageThreadId,
+              }
+            );
+            continue;
+          }
+          if (!t.retweetUrl) {
+            await sendMessage(
+              ctx,
+              t.url +
+                `\n${t.ownerName}\n\n${t.fullText}\n\n投稿時間: ${format(
+                  t.createdAt
+                )}\n#${t.ownerScreenName}_tweets`,
+              {
+                chat_id: finalChatId,
+                reply_to_message_id: TweetsMessageThreadId,
+              }
+            );
+
+            const recoveredLinks = await recoverLinks(t.fullText);
+            if (recoveredLinks.length > 0) {
+              await sendMessage(
+                ctx,
+                `${t.ownerName}\n🎥 Link: ${recoveredLinks[0]}`,
+                {
+                  chat_id: finalChatId,
+                  reply_to_message_id: TweetsMessageThreadId,
+                  disable_web_page_preview: true,
+                }
+              );
+            }
+
+            //To prevent rate limit and preserve message order
+            await sleep(1000);
+          }
+
+          completedTweets.unshift(t.entryId);
+        }
+        await this.sendRetweet(ctx, extractedTweets, finalChatId);
+      } catch (e) {
+        await this.updateLastRetrievedTweets(finalChatId, completedTweets);
+      }
+
+      await this.updateLastRetrievedTweets(finalChatId, lastestTweets);
     } catch (e) {
       // For maintainace
       return await sendMessage(
         null,
-        `${identity.id}號人仔有d問題, 得閒check下${e}`,
+        `${identity.id}號人仔有d問題, 得閒check下\n${e}`,
         {
           chat_id: "279337376",
+          reply_to_message_id: TweetsMessageThreadId,
         }
       );
     }
-
-    const chat_id = ctx?.update.message.chat.id;
-    const finalChatId = chat_id || fallBackChatId;
-    const lastRetrievedTweets = await this.getLastRetrievedTweets(finalChatId);
-
-    let extractedTweets = this.extractTweets(tweets);
-    if (extractedTweets === undefined) {
-      if (ctx) {
-        return await sendMessage(ctx, "Twitter又改野整壞左", {});
-      }
-      return;
-    }
-
-    extractedTweets = extractedTweets
-      .filter(
-        (tweet) =>
-          tweet.entryId.startsWith("tweet-") ||
-          tweet.entryId.startsWith("list-conversation-")
-      )
-      .map((tweet) => this.processTweet(tweet))
-      .flat();
-
-    const lastestTweets = extractedTweets.map((t) => t.entryId);
-
-    if (lastRetrievedTweets.includes(extractedTweets[0].entryId)) {
-      return ctx ? await sendMessage(ctx, "暫時沒有新tweet", {}) : null;
-    }
-
-    let sliceIndex = -1;
-    let allLooped = false;
-    let loopIdx = 0;
-    while (sliceIndex <= 0 && !allLooped) {
-      sliceIndex = extractedTweets.findIndex(
-        (tweet) => tweet.entryId === lastRetrievedTweets[loopIdx]
-      );
-      allLooped = lastRetrievedTweets.length <= ++loopIdx;
-    }
-    if (sliceIndex > 0) {
-      extractedTweets = extractedTweets.slice(0, sliceIndex);
-    } else {
-      return await sendMessage(
-        null,
-        `lastRetrievedTweet\n------\n${extractedTweets
-          .map((t) => t.entryId)
-          .join("\n")}`,
-        {
-          chat_id: "279337376",
-        }
-      );
-    }
-
-    extractedTweets.reverse();
-    const completedTweets = [];
-
-    try {
-      for (let t of extractedTweets) {
-        if (t.spaceUrl) {
-          await sendMessage(
-            ctx,
-            `🎙️ Twitter Space 通知\n\n${t.ownerName}\n${t.spaceUrl}`,
-            {
-              chat_id: finalChatId,
-            }
-          );
-          continue;
-        }
-        if (!t.retweetUrl) {
-          await sendMessage(
-            ctx,
-            t.url +
-              `\n${t.ownerName}\n\n${t.fullText}\n\n投稿時間: ${format(
-                t.createdAt
-              )}`,
-            { chat_id: finalChatId }
-          );
-
-          const recoveredLinks = await recovereLinks(t.fullText);
-          if (recoveredLinks.length > 0) {
-            await sendMessage(
-              ctx,
-              `${t.ownerName}\n🎥 Link: ${recoveredLinks[0]}`,
-              {
-                chat_id: finalChatId,
-                disable_web_page_preview: true,
-              }
-            );
-          }
-
-          //To prevent rate limit and preserve message order
-          await sleep(1000);
-        }
-
-        completedTweets.unshift(t.entryId);
-      }
-      await this.sendRetweet(ctx, extractedTweets, finalChatId);
-    } catch (e) {
-      await this.updateLastRetrievedTweets(finalChatId, completedTweets);
-    }
-
-    await this.updateLastRetrievedTweets(finalChatId, lastestTweets);
   }
 
   chooseIdentity(ctx, identities) {
@@ -227,6 +253,7 @@ class TwitterWorker {
         ),
       {
         chat_id,
+        reply_to_message_id: TweetsMessageThreadId,
         disable_web_page_preview: true,
         parse_mode: "HTML",
       }

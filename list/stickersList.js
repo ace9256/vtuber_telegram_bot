@@ -70,6 +70,8 @@ const stickersList = [
   "みたらしねこ: https://t.me/addstickers/mitachishineko",
   "久遠たま: https://t.me/addstickers/QuonTama",
   "久遠たま Line: https://t.me/addstickers/TamaLineStickers",
+  "HIMEHINA: https://t.me/addstickers/HIMEHINA_sticker",
+  "Kanikama: https://t.me/addstickers/KanikamaLine",
   "利香: https://t.me/addstickers/RikaChStickers",
   "みけねこ: https://t.me/addstickers/mikenekoLine",
   "見字睇V: https://t.me/addstickers/SeeWordWatchV",
