@@ -13,6 +13,7 @@ const services = Object.keys(serviceClasses).reduce(
 
 const commandIterator = (bot) => {
   bot.start(botWrapper(services["utilService"], "start"));
+  bot.on("callback_query", logUpdateMessage);
   setupCommands(bot);
   setupActions(bot);
   bot.on("sticker", logUpdateMessage);
@@ -49,6 +50,7 @@ const setupActions = (bot) => {
 };
 
 const logUpdateMessage = (ctx) => {
+  console.log(ctx.update.callback_query);
   console.log(ctx.update.message);
 };
 

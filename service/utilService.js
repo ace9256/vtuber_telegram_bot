@@ -302,7 +302,7 @@ class UtilService {
     const {
       data: { db },
     } = await axios.post(
-      "${replitDbDomain}/db/timeReminder",
+      `${replitDbDomain}/db/timeReminder`,
       body
     );
     if (db) {
@@ -604,7 +604,7 @@ class UtilService {
       const {
         data: { db },
       } = await axios.post(
-        "${replitDbDomain}/db/memo",
+        `${replitDbDomain}/db/memo`,
         body
       );
       if (db) {
