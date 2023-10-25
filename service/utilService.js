@@ -301,10 +301,7 @@ class UtilService {
     }
     const {
       data: { db },
-    } = await axios.post(
-      `${replitDbDomain}/db/timeReminder`,
-      body
-    );
+    } = await axios.post(`${replitDbDomain}/db/timeReminder`, body);
     if (db) {
       return await axios.post(
         `https://api.telegram.org/bot${token}/sendMessage`,
@@ -370,16 +367,13 @@ class UtilService {
     if (params.length <= 1) {
       const {
         data: { db },
-      } = await axios.delete(
-        `${replitDbDomain}/db/timeReminder`,
-        {
-          data: {
-            chat_id,
-            from,
-            target: "all",
-          },
-        }
-      );
+      } = await axios.delete(`${replitDbDomain}/db/timeReminder`, {
+        data: {
+          chat_id,
+          from,
+          target: "all",
+        },
+      });
       if (!db) {
         return await axios.post(
           `https://api.telegram.org/bot${token}/sendMessage`,
@@ -411,16 +405,13 @@ class UtilService {
     }
     const {
       data: { db },
-    } = await axios.delete(
-      `${replitDbDomain}/db/timeReminder`,
-      {
-        data: {
-          chat_id,
-          from,
-          target: params[1],
-        },
-      }
-    );
+    } = await axios.delete(`${replitDbDomain}/db/timeReminder`, {
+      data: {
+        chat_id,
+        from,
+        target: params[1],
+      },
+    });
     if (!db) {
       return await axios.post(
         `https://api.telegram.org/bot${token}/sendMessage`,
@@ -445,9 +436,7 @@ class UtilService {
   async executeAlarm() {
     const {
       data: { data },
-    } = await axios.get(
-      `${replitDbDomain}/db/timeReminder?chatId=all&from=`
-    );
+    } = await axios.get(`${replitDbDomain}/db/timeReminder?chatId=all&from=`);
     for (let chat of data) {
       for (let chat_id in chat) {
         for (let from in chat[chat_id]) {
@@ -475,16 +464,13 @@ class UtilService {
                   reply_to_message_id: alarm.message_id,
                 }
               );
-              await axios.delete(
-                `${replitDbDomain}/db/timeReminder`,
-                {
-                  data: {
-                    chat_id,
-                    from,
-                    target: i + 1,
-                  },
-                }
-              );
+              await axios.delete(`${replitDbDomain}/db/timeReminder`, {
+                data: {
+                  chat_id,
+                  from,
+                  target: i + 1,
+                },
+              });
             }
           }
         }
@@ -558,12 +544,16 @@ class UtilService {
   }
 
   async checkStickersList(ctx) {
-    let str = stickersList.join("\n");
-    await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-      chat_id: ctx.update.message.chat.id,
-      text: str,
-      reply_to_message_id: ctx.update.message.message_id,
-    });
+    const list = [...stickersList];
+    while (list.length > 0) {
+      const batch = list.splice(0, 30);
+      const str = batch.join("\n");
+      await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+        chat_id: ctx.update.message.chat.id,
+        text: str,
+        reply_to_message_id: ctx.update.message.message_id,
+      });
+    }
   }
 
   async calculate(ctx) {
@@ -603,10 +593,7 @@ class UtilService {
       const body = { input, chat_id };
       const {
         data: { db },
-      } = await axios.post(
-        `${replitDbDomain}/db/memo`,
-        body
-      );
+      } = await axios.post(`${replitDbDomain}/db/memo`, body);
       if (db) {
         return await axios.post(
           `https://api.telegram.org/bot${token}/sendMessage`,
@@ -629,9 +616,7 @@ class UtilService {
     } else {
       const {
         data: { data },
-      } = await axios.get(
-        `${replitDbDomain}/db/memo?chatId=${chat_id}`
-      );
+      } = await axios.get(`${replitDbDomain}/db/memo?chatId=${chat_id}`);
       if (data) {
         let ans = "";
         for (let i = 0; i < data.length; i++) {
@@ -665,15 +650,12 @@ class UtilService {
     if (params.length <= 1) {
       const {
         data: { db },
-      } = await axios.delete(
-        `${replitDbDomain}/db/memo`,
-        {
-          data: {
-            chat_id,
-            target: "all",
-          },
-        }
-      );
+      } = await axios.delete(`${replitDbDomain}/db/memo`, {
+        data: {
+          chat_id,
+          target: "all",
+        },
+      });
       if (!db) {
         return await axios.post(
           `https://api.telegram.org/bot${token}/sendMessage`,
