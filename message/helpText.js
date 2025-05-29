@@ -7,6 +7,7 @@ const helpText = `
 /alarm 在command後加上時間,日期,文字就會設置alarm,只輸入command就是查詢alarm
 /del_alarm 在command後加上數字就是刪除指定alarm,只輸入command就是刪除所有alarm
 /t 翻譯
+/deepl Deepl翻譯
 /cal 計數
 /pin quote message就會自動pin, 沒有quote就會列出已pin的項目
 /unpin 在command後加上數字就是刪除指定pinned message,只輸入command就是刪除所有pinned message

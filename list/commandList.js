@@ -46,9 +46,11 @@ const commandWithParamsList = [
   "\/cal.* utilService calculate",
   "\/unpin.* utilService delMemo",
   "\/t.* utilService translate",
+    "\/deepl.* utilService deepl",
   "@here chatService tagAll",
   "\/ocr.* utilService ocr",
   "\/check_twitter.* twitterService checkTwitter",
+  "\/vx.* utilService vx",
 ];
 
 module.exports = { commandList, commandWithParamsList };

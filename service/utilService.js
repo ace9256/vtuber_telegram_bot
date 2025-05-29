@@ -1,7 +1,10 @@
 const axios = require("axios");
+const followRedirect = require("follow-redirect-url");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
-const { token, ocrApiKey, replitDbDomain } = require("../env");
+const { token, ocrApiKey, deepApiKey, replitDbDomain } = require("../env");
+const { ocrSpace } = require("ocr-space-api-wrapper");
+const translate = require("deepl");
 const { isMidNight } = require("../helper/checkMidNight");
 const { helpText } = require("../message/helpText");
 const { startText } = require("../message/startText");
@@ -543,6 +546,47 @@ class UtilService {
     }
   }
 
+  async deepl(ctx) {
+    if (!ctx.update.message.reply_to_message) {
+      const params = ctx.update.message.text.split(/\s+/);
+      params.shift();
+      if (params.length == 0) {
+        await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+          chat_id: ctx.update.message.chat.id,
+          text: "唔知你想翻譯啲乜",
+          reply_to_message_id: ctx.update.message.message_id,
+        });
+      } else {
+        const { data } = await translate({
+          free_api: true,
+          text: params.join(" "),
+          target_lang: "ZH-HANT",
+          auth_key: deepApiKey,
+        });
+
+        await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+          chat_id: ctx.update.message.chat.id,
+          text: decodeURIComponent(data?.translations?.[0]?.text),
+          reply_to_message_id: ctx.update.message.message_id,
+        });
+      }
+      return;
+    } else {
+      const { data } = await translate({
+        free_api: true,
+        text: ctx.update.message.reply_to_message.text,
+        target_lang: "ZH-HANT",
+        auth_key: deepApiKey,
+      });
+
+      await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+        chat_id: ctx.update.message.chat.id,
+        text: decodeURIComponent(data?.translations?.[0]?.text),
+        reply_to_message_id: ctx.update.message.message_id,
+      });
+    }
+  }
+
   async checkStickersList(ctx) {
     const list = [...stickersList];
     while (list.length > 0) {
@@ -732,20 +776,6 @@ class UtilService {
   }
 
   async ocr(ctx) {
-    // check server status
-    const { data: statusRes } = await axios.get("https://status.ocr.space/");
-    const { document } = new JSDOM(statusRes).window;
-    const status = document.querySelector(".status").innerHTML;
-    if (status === " DOWN ") {
-      await sendMessage(
-        ctx,
-        "個圖像識別server好似down down地, 如果唔得就過一陣再試啦",
-        {
-          reply: ctx.update.message.reply_to_message,
-        }
-      );
-    }
-
     // main logic
     const args = ctx.match.input.split(" ");
     if (args.length === 1) {
@@ -774,19 +804,35 @@ class UtilService {
     if (text) {
       var url = text;
     }
-
     const ext = args[2] || url.match(/(PDF|GIF|PNG|JPG|TIF|BMP)/i)?.[0];
-    const { data } = await axios.get(
-      `https://api.ocr.space/parse/imageurl?apikey=${ocrApiKey}&url=${encodeURIComponent(
-        url
-      )}&filetype=${ext}&language=${args[1]}&OCREngine=3&scale=true`
-    );
+    const data = await ocrSpace(url, {
+      apiKey: ocrApiKey,
+      language: args[1],
+      filetype: ext,
+    });
     if (!data.ParsedResults?.[0].ParsedText) {
       return await sendMessage(ctx, "投降, 認唔到", {
         reply: ctx.update.message.reply_to_message,
       });
     }
-    await sendMessage(ctx, data.ParsedResults?.[0].ParsedText, {
+    console.log(JSON.stringify(data.ParsedResults?.[0].ParsedText));
+    await sendMessage(
+      ctx,
+      data.ParsedResults?.[0].ParsedText.replaceAll("\r\n", ""),
+      {
+        reply: ctx.update.message.reply_to_message,
+      }
+    );
+  }
+
+  async vx(ctx) {
+    const link = ctx.update.message.text.substring(4).replace(/ /g, "");
+    const recoveredLinkData = await followRedirect.startFollowing(link);
+    let recoveredLink = recoveredLinkData?.[recoveredLinkData.length - 1].url;
+    if (recoveredLink.includes("tiktok.com")) {
+      recoveredLink = recoveredLink.replace("tiktok", "vxtiktok");
+    }
+    await sendMessage(ctx, recoveredLink, {
       reply: ctx.update.message.reply_to_message,
     });
   }

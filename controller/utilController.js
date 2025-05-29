@@ -4,6 +4,7 @@ class UtilController {
   constructor() {}
 
   async pingHandler(req, res) {
+    console.log('-----pinged-----')
     res.json({ ping: true });
   }
 

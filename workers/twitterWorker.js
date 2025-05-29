@@ -2,8 +2,9 @@ const axios = require("axios");
 const {
   token,
   TweetsMessageThreadId,
+  SpaceMessageThreadId,
   twitterList,
-  replitDbDomain,
+  appwriteDomain,
 } = require("../env");
 const { isMidNight } = require("../helper/checkMidNight");
 const { recoverLinks } = require("../helper/recoverLinks");
@@ -39,7 +40,7 @@ class TwitterWorker {
       //   console.log(JSON.stringify(tweets.errors));
       //   throw new Error(JSON.stringify(tweets.errors));
       // }
-
+      console.log(`tweet已偷...`);
       const chat_id = ctx?.update.message.chat.id;
       const finalChatId = chat_id || fallBackChatId;
       const lastRetrievedTweets = await this.getLastRetrievedTweets(
@@ -115,7 +116,7 @@ class TwitterWorker {
               `🎙️ Twitter Space 通知\n\n${t.ownerName}\n${t.spaceUrl}`,
               {
                 chat_id: finalChatId,
-                reply_to_message_id: TweetsMessageThreadId,
+                reply_to_message_id: SpaceMessageThreadId,
               }
             );
             continue;
@@ -152,22 +153,27 @@ class TwitterWorker {
 
           completedTweets.unshift(t.entryId);
         }
+        console.log(`準備出tweet...`);
         await this.sendRetweet(ctx, extractedTweets, finalChatId);
+        console.log(`tweet已出`);
       } catch (e) {
         await this.updateLastRetrievedTweets(finalChatId, completedTweets);
       }
 
+      console.log(`準備tweet更新進度...`);
       await this.updateLastRetrievedTweets(finalChatId, lastestTweets);
+      console.log(`已更新`);
     } catch (e) {
       // For maintainace
-      return await sendMessage(
-        null,
-        `${identity.id}號人仔有d問題, 得閒check下\n${e}`,
-        {
-          chat_id: "279337376",
-          reply_to_message_id: TweetsMessageThreadId,
-        }
-      );
+      // return await sendMessage(
+      //   null,
+      //   `${identity.id}號人仔有d問題, 得閒check下\n${e}`,
+      //   {
+      //     chat_id: "279337376",
+      //     reply_to_message_id: TweetsMessageThreadId,
+      //   }
+      // );
+      console.log(`${identity.id}號人仔有d問題, 得閒check下\n${e}`);
     }
   }
 
@@ -189,7 +195,7 @@ class TwitterWorker {
       const {
         data: { data: lastRetrievedTweets },
       } = await axios.get(
-        `${replitDbDomain}/db/lastRetrievedTweets?chatId=${chat_id}`
+        `${appwriteDomain}/db/lastRetrievedTweets?chatId=${chat_id}`
       );
 
       return lastRetrievedTweets;
@@ -203,11 +209,13 @@ class TwitterWorker {
 
   async updateLastRetrievedTweets(chat_id, tweets, trial = 0) {
     try {
+      console.log(`${appwriteDomain}/db/lastRetrievedTweets?tweet=` +
+          tweets.slice(0, -8).join(",") +
+          `&chatId=${chat_id}`)
       await axios.put(
-        tweets.reduce(
-          (prev, curr) => prev + `tweet[]=${curr}&`,
-          `${replitDbDomain}/db/lastRetrievedTweets?`
-        ) + `chatId=${chat_id}`
+        `${appwriteDomain}/db/lastRetrievedTweets?tweet=` +
+          tweets.slice(0, -8).join(",") +
+          `&chatId=${chat_id}`
       );
     } catch (e) {
       if (trial < 3) {
@@ -348,7 +356,7 @@ class TwitterWorker {
 
   extractTwitterSpace(urls) {
     const spaceArr = urls.filter((m) =>
-      m.expanded_url.includes("https://twitter.com/i/spaces/")
+      m.expanded_url?.includes("/i/spaces/")
     );
     if (spaceArr.length > 0) {
       return { spaceUrl: spaceArr[0].expanded_url };
