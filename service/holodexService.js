@@ -130,6 +130,23 @@ class HolodexService {
   async asmrFuture(ctx) {
     this.recommandPart2(arguments["0"]["match"][0], ctx);
   }
+
+  async getTwitchLives(token) {
+    const headers = {
+      authorization: token,
+      "sec-fetch-site": "same-origin",
+    };
+
+    const url = "https://holodex.net/api/v2/users/live?includePlaceholder=true";
+
+    try {
+      const response = await axios.get(url, { headers });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Twitch lives:", error.message);
+      throw error;
+    }
+  }
 }
 
 module.exports = HolodexService;
