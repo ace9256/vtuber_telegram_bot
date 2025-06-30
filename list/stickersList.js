@@ -178,6 +178,7 @@ const stickersList = [
   "KMNZ: https://t.me/addstickers/kmnz_by_moe_sticker_bot",
   "あかつき るき: https://t.me/addstickers/AkatsukiLuci_by_moe_sticker_bot",
   "猫宮るな: https://t.me/addstickers/RunaNekomiya_by_moe_sticker_bot",
+  "ミクスト公式スタンプ: https://t.me/addstickers/line31088915d73a_by_moe_sticker_bot",
   "天吹サン: https://t.me/addstickers/San_Mixstgirls_by_moe_sticker_bot",
   "雪白キャル: https://t.me/addstickers/Qalu_Mixstgirls_by_moe_sticker_bot",
   "白傘くらげ: https://t.me/addstickers/KurageShirakasa_by_moe_sticker_bot",
