@@ -162,6 +162,7 @@ const stickersList = [
   "猫滅刃とばり: https://t.me/addstickers/nyahoroba_tobari_by_moe_sticker_bot",
   "人類滅亡部スタンプセット: https://t.me/addstickers/line28803852d51f_by_moe_sticker_bot",
   "領国つかさ: https://t.me/addstickers/tsukasa_ryogoku_by_moe_sticker_bot",
+  "智念せいら: https://t.me/addstickers/seira_chinen_by_moe_sticker_bot",
   "本阿弥あずさ: https://t.me/addstickers/azusa_honami_by_moe_sticker_bot",
   "王猛ちたむ: https://t.me/addstickers/chitamu_omo_by_moe_sticker_bot",
   "稍麦: https://t.me/addstickers/yayamugi_by_moe_sticker_bot",
