@@ -138,6 +138,7 @@ const stickersList = [
   "赤見かるび2: https://t.me/addstickers/karubiStickers2_by_moe_sticker_bot",
   "赤見かるび Line: https://t.me/addstickers/karubiLineStickers",
   "赤見かるび ボイススタンプ: https://t.me/addstickers/line32331b002_by_moe_sticker_bot",
+  "デブかるびスタンプ: https://t.me/addstickers/line3579542d3_by_moe_sticker_bot",
   "甘城なつき Line: https://t.me/addstickers/line28887845db7d_by_moe_sticker_bot",
   "Nachoneko絵文字: https://t.me/addstickers/line686c809c7a295f1761c5b8d61b8d_by_moe_sticker_bot",
   "天鬼ぷるる: https://t.me/addstickers/amakipururu_by_moe_sticker_bot",
