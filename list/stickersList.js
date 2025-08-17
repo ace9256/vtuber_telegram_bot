@@ -185,6 +185,7 @@ const stickersList = [
   "天吹サン: https://t.me/addstickers/San_Mixstgirls_by_moe_sticker_bot",
   "雪白キャル: https://t.me/addstickers/Qalu_Mixstgirls_by_moe_sticker_bot",
   "白傘くらげ: https://t.me/addstickers/KurageShirakasa_by_moe_sticker_bot",
+  "胡桃沢りりか: https://t.me/addstickers/Ririka_krmzw_by_moe_sticker_bot",
   "しのプロ: https://t.me/addstickers/line305600440523_by_moe_sticker_bot",
   "見字睇V: https://t.me/addstickers/SeeWordWatchV",
 ];
