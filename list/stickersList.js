@@ -189,6 +189,7 @@ const stickersList = [
   "白傘くらげ: https://t.me/addstickers/KurageShirakasa_by_moe_sticker_bot",
   "胡桃沢りりか: https://t.me/addstickers/Ririka_krmzw_by_moe_sticker_bot",
   "しのプロ: https://t.me/addstickers/line305600440523_by_moe_sticker_bot",
+  "七海うらら: https://t.me/addstickers/line319319400fa7_by_moe_sticker_bot",
   "見字睇V: https://t.me/addstickers/SeeWordWatchV",
 ];
 
