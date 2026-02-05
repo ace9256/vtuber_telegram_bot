@@ -185,11 +185,13 @@ const stickersList = [
   "ミクスト公式スタンプ: https://t.me/addstickers/line31088915d73a_by_moe_sticker_bot",
   "天吹サン: https://t.me/addstickers/San_Mixstgirls_by_moe_sticker_bot",
   "雪白キャル: https://t.me/addstickers/Qalu_Mixstgirls_by_moe_sticker_bot",
+  "琴宮いおり: https://t.me/addstickers/Kotomiya_Iori_by_moe_sticker_bot",
   "渚沢シチ: https://t.me/addstickers/Shichi_Mixstgirls_by_moe_sticker_bot",
   "白傘くらげ: https://t.me/addstickers/KurageShirakasa_by_moe_sticker_bot",
   "胡桃沢りりか: https://t.me/addstickers/Ririka_krmzw_by_moe_sticker_bot",
   "しのプロ: https://t.me/addstickers/line305600440523_by_moe_sticker_bot",
   "七海うらら: https://t.me/addstickers/line319319400fa7_by_moe_sticker_bot",
+  "柚鳥ペケ: https://t.me/addstickers/pekeispeak_by_moe_sticker_bot",
   "見字睇V: https://t.me/addstickers/SeeWordWatchV",
 ];
 
