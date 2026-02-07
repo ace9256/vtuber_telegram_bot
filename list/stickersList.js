@@ -193,6 +193,7 @@ const stickersList = [
   "しのプロ: https://t.me/addstickers/line305600440523_by_moe_sticker_bot",
   "七海うらら: https://t.me/addstickers/line319319400fa7_by_moe_sticker_bot",
   "柚鳥ペケ: https://t.me/addstickers/pekeispeak_by_moe_sticker_bot",
+  "VIER: https://t.me/addstickers/VIER_by_moe_sticker_bot",
   "見字睇V: https://t.me/addstickers/SeeWordWatchV",
 ];
 
